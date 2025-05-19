@@ -1,0 +1,38 @@
+# ESP-IDF 核心忽略规则
+/build/               # 编译输出目录（IDF 专用）
+/sdkconfig            # 当前环境配置
+/sdkconfig.old        # 旧版配置
+/log.txt              # 常见日志文件
+managed_components/   # 自动下载的组件
+
+# 二进制和烧录文件
+*.bin
+*.elf
+*.map
+*.partitions
+
+# 生成的文件
+/flash_*              # flash 参数文件
+/partition_table/     # 分区表生成目录
+
+# 开发环境相关
+.vscode/              # VSCode 配置（如果用官方插件）
+.idea/                # CLion 配置
+*.swp                 # Vim 临时文件
+*.swo
+
+# 保留必要配置文件（白名单）
+!sdkconfig.defaults   # 默认配置模板
+!partitions.csv       # 分区表源文件
+
+# 通用补充规则（保持兼容性）
+**/target/
+**/bin/
+**/obj/
+**/node_modules/
+*.pyc
+__pycache__/
+
+# 保留工作区配置
+!.vscode/settings.json
+!.vscode/extensions.json
