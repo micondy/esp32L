@@ -12,7 +12,7 @@
 #define LEDC_HS_MODE           LEDC_HIGH_SPEED_MODE
 
 #define LEDC_TEST_CH_NUM       (4)
-//8 9 4 5 这4个io是低速口。
+//18 19 17 15 这4个io口，数组下标0 1 2 3。
 static ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
     {
         .channel    = LEDC_CHANNEL_0,
@@ -35,8 +35,8 @@ static ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
     {
         .channel    = LEDC_CHANNEL_2,
         .duty       = 0,
-        .gpio_num   = 4,
-        .speed_mode = LEDC_LS_MODE,
+        .gpio_num   = 17,
+        .speed_mode = LEDC_HS_MODE,
         .hpoint     = 0,
         .timer_sel  = LEDC_LS_TIMER,
         .flags.output_invert = 0
@@ -45,9 +45,9 @@ static ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
         .channel    = LEDC_CHANNEL_3,
         .duty       = 0,
         .gpio_num   = 5,
-        .speed_mode = LEDC_LS_MODE,
+        .speed_mode = LEDC_HS_MODE,
         .hpoint     = 0,
-        .timer_sel  = LEDC_LS_TIMER,
+        .timer_sel  = LEDC_HS_TIMER,
         .flags.output_invert = 0
     },
 };

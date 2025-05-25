@@ -1,0 +1,3 @@
+dependencies:
+  espressif/i2c_bus: =*
+  espressif/sht3x: =*

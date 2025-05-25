@@ -4,7 +4,6 @@
 #include "nvs_flash.h"
 #include "esp_log.h"
 
-#define MY_NVS_TAG "my_nvs_storage" 
 
 #include "nvs_flash.h"
 #include "esp_log.h"

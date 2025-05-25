@@ -7,6 +7,8 @@ static const char* TAG = "Ultrasonic";
 
 
 ultrasonic_sensor_t hc_sr04_sensor;
+uint32_t hc_sr04_trig_pin = 22;
+uint32_t hc_sr04_echo_pin = 23;
 float hc_sr04_distance;
 
 // 中断处理函数
@@ -42,7 +44,7 @@ static void measurement_task(void* arg) {
 
                 // 计算距离
                 hc_sr04_distance = pulse_duration * 0.0343f / 2.0f;
-                ESP_LOGW(TAG, "Distance: %.2f cm", hc_sr04_distance);
+                ESP_LOGI(TAG, "Distance: %.2f cm", hc_sr04_distance);
             }
         }
     }
@@ -95,7 +97,7 @@ esp_err_t ultrasonic_init(ultrasonic_sensor_t* sensor,
                                 "ultrasonic_task",
                                 2048,
                                 sensor,
-                                5,
+                                6,
                                 &sensor->task_handle);
     if (ret != pdPASS) {
         vQueueDelete(sensor->queue);

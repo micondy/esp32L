@@ -17,6 +17,8 @@ typedef struct {
 } ultrasonic_sensor_t;
 
 extern ultrasonic_sensor_t  hc_sr04_sensor;
+extern uint32_t hc_sr04_trig_pin ;
+extern uint32_t hc_sr04_echo_pin;
 extern float hc_sr04_distance;
 /**
  * @brief 初始化超声波传感器

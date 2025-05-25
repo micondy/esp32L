@@ -1,0 +1,4 @@
+{
+    "cmake.sourceDirectory": "D:/A_ESP32L/esp32L/demo",
+    "idf.portWin": "COM3"
+}

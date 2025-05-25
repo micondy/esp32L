@@ -3,6 +3,7 @@
 #include "lwip/sockets.h"
 #include "cJSON.h"
 #include "ledc_motor_pwm.h"
+
 #define Tcp_Client_TAG "TCP_CLIENT"
 
 char rx_buffer[256] = {0};
@@ -216,6 +217,7 @@ void tcp_client_send_task(void *pvParameters)
 }
 
 #include "ultrasonic.h"
+#include "sht30.h"
 void prepare_data_to_send(char *data_to_send, size_t buffer_size)
 {
     if (data_to_send == NULL)
@@ -228,8 +230,8 @@ void prepare_data_to_send(char *data_to_send, size_t buffer_size)
     memset(data_to_send, 0, buffer_size); // 清空缓冲区
 
     char temp_buffer[128] = {0};
-    snprintf(temp_buffer, sizeof(temp_buffer), "~%s|humidity:%d,temperature:%d,distance:%.2f",
-             UUID, 99, 150, hc_sr04_distance);
+    snprintf(temp_buffer, sizeof(temp_buffer), "~%s|humidity:%.2f,temperature:%.2f,distance:%.2f",
+             UUID, sht30_humidity, sht30_temperature, hc_sr04_distance);
 
     memcpy(data_to_send, temp_buffer, strlen(temp_buffer));
     ESP_LOGD(Tcp_Client_TAG, "Prepared data: %s", data_to_send); // 调试日志，准备好的数据
