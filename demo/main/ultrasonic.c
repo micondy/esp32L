@@ -3,12 +3,14 @@
 #include "esp_timer.h"
 #include "freertos/task.h"
 
+#define ULTRASONIC_TAG "ULTRASONIC"
+
 static const char* TAG = "Ultrasonic";
 
 
 ultrasonic_sensor_t hc_sr04_sensor;
-uint32_t hc_sr04_trig_pin = 22;
-uint32_t hc_sr04_echo_pin = 23;
+uint32_t hc_sr04_trig_pin = 2;
+uint32_t hc_sr04_echo_pin = 15;
 float hc_sr04_distance;
 
 // 中断处理函数
@@ -41,7 +43,6 @@ static void measurement_task(void* arg) {
                     ESP_LOGW(TAG, "Measurement timeout");
                     continue;
                 }
-
                 // 计算距离
                 hc_sr04_distance = pulse_duration * 0.0343f / 2.0f;
                 ESP_LOGI(TAG, "Distance: %.2f cm", hc_sr04_distance);
@@ -109,6 +110,8 @@ esp_err_t ultrasonic_init(ultrasonic_sensor_t* sensor,
     ESP_ERROR_CHECK(gpio_install_isr_service(0));
     ESP_ERROR_CHECK(gpio_isr_handler_add(echo_pin, gpio_isr_handler, sensor));
 
+    ESP_LOGI(ULTRASONIC_TAG, "超声波模块初始化完成");
+
     return ESP_OK;
 }
 
@@ -124,12 +127,20 @@ esp_err_t ultrasonic_measure_once(ultrasonic_sensor_t* sensor) {
 }
 
 void ultrasonic_cleanup(ultrasonic_sensor_t* sensor) {
+    if (!sensor) return;
+
     if (sensor->task_handle) {
         vTaskDelete(sensor->task_handle);
+        sensor->task_handle = NULL;
+        ESP_LOGI(TAG, "测距任务已删除");
     }
     if (sensor->queue) {
         vQueueDelete(sensor->queue);
+        sensor->queue = NULL;
+        ESP_LOGI(TAG, "队列已删除");
     }
     gpio_isr_handler_remove(sensor->echo_pin);
     gpio_uninstall_isr_service();
+    ESP_LOGI(TAG, "中断服务已卸载");
+    ESP_LOGI(ULTRASONIC_TAG, "超声波模块资源已释放");
 }

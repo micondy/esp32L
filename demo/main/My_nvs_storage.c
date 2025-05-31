@@ -9,6 +9,7 @@
 #include "esp_log.h"
 
 #define MY_NVS_TAG   "WIFI_NVS"
+#define NVS_STORAGE_TAG "NVS_STORAGE"
 #define NVS_WIFI_SPACE "wifi_config"
 #define MAX_SSID_LEN  32
 #define MAX_PASS_LEN  64
@@ -52,7 +53,7 @@ esp_err_t save_wifi_settings(const char *ssid, const char *password) {
     if ((err = nvs_commit(handle)) != ESP_OK) {
         ESP_LOGE(MY_NVS_TAG, "Commit failed: %s", esp_err_to_name(err));
     } else {
-        ESP_LOGI(MY_NVS_TAG, "Saved: SSID=%s , PASS=%s", ssid,password);
+        ESP_LOGI(NVS_STORAGE_TAG, "WiFi配置已保存: SSID=%s", ssid);
     }
 
 cleanup:
@@ -62,13 +63,12 @@ cleanup:
 
 /* 从NVS加载WiFi凭证 */
 esp_err_t load_wifi_settings(char *ssid, char *password, size_t buffer_size) {
-   
     nvs_handle_t handle;
     esp_err_t err;
-    
+
     // 初始化缓冲区
-    memset(ssid, 0, MAX_SSID_LEN);
-    memset(password, 0, MAX_PASS_LEN);
+    if (ssid) memset(ssid, 0, buffer_size);
+    if (password) memset(password, 0, buffer_size);
 
     // 打开NVS命名空间
     if ((err = nvs_open(NVS_WIFI_SPACE, NVS_READONLY, &handle)) != ESP_OK) {
@@ -77,14 +77,14 @@ esp_err_t load_wifi_settings(char *ssid, char *password, size_t buffer_size) {
     }
 
     // 读取SSID
-    size_t required_size = MAX_SSID_LEN;
+    size_t required_size = buffer_size;
     if ((err = nvs_get_str(handle, "wifi_ssid", ssid, &required_size)) != ESP_OK) {
         ESP_LOGE(MY_NVS_TAG, "Read SSID failed: %s", esp_err_to_name(err));
         goto cleanup;
     }
 
     // 读取密码
-    required_size = MAX_PASS_LEN;
+    required_size = buffer_size;
     if ((err = nvs_get_str(handle, "wifi_pass", password, &required_size)) != ESP_OK) {
         ESP_LOGE(MY_NVS_TAG, "Read PASS failed: %s", esp_err_to_name(err));
     } else {

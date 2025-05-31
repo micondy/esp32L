@@ -26,6 +26,56 @@
 #include "ultrasonic.h"
 #include "sht30.h"
 
+void sht30_task(void *pvParameters)
+{
+    bool sht30_ready = false;
+
+    while (1)
+    {
+        if (!sht30_ready)
+        {
+            if (sht30_init(SHT30_I2C_SCL_IO, SHT30_I2C_SDA_IO, SHT30_I2C_PORT, SHT30_I2C_FREQ_HZ) == ESP_OK)
+            {
+                sht30_ready = true;
+                ESP_LOGI("SHT30", "初始化成功");
+            }
+            else
+            {
+                ESP_LOGE("SHT30", "初始化失败， 10秒后重试");
+                vTaskDelay(pdMS_TO_TICKS(10000));
+                continue;
+            }
+        }
+        sht30_read_data();
+        vTaskDelay(pdMS_TO_TICKS(5000));
+    }
+}
+
+// 新版超声波测距任务，自动初始化和重试
+void ultrasonic_task(void *pvParameters)
+{
+    bool ultrasonic_ready = false;
+    while (1)
+    {
+        if (!ultrasonic_ready)
+        {
+            if (ultrasonic_init(&hc_sr04_sensor, hc_sr04_trig_pin, hc_sr04_echo_pin, 25000) == ESP_OK)
+            {
+                ultrasonic_ready = true;
+                ESP_LOGI("ULTRASONIC", "初始化成功");
+            }
+            else
+            {
+                ESP_LOGE("ULTRASONIC", "初始化失败，10秒后重试");
+                vTaskDelay(pdMS_TO_TICKS(10000)); // 10秒重试
+                continue;
+            }
+        }
+        ultrasonic_measure_once(&hc_sr04_sensor);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
 void app_main(void)
 {
 
@@ -41,21 +91,18 @@ void app_main(void)
     initialise_wifi();
     // 初始化电机
     ledc_motor_pwm_init();
-    // 初始化超声波 25000us,4.25m了.
-    ultrasonic_init(&hc_sr04_sensor, hc_sr04_trig_pin, hc_sr04_echo_pin, 25000);
-    // 初始化sht30
-    sht30_init(SHT30_I2C_SCL_IO, SHT30_I2C_SDA_IO, SHT30_I2C_PORT, SHT30_I2C_FREQ_HZ);
 
+    // 创建网络通信任务
     xTaskCreate(tcp_client_receive_task, "tcp_client_receive", 4096, NULL, 5, NULL);
     xTaskCreate(tcp_client_send_task, "tcp_client_send", 4096, NULL, 5, NULL);
 
+    // 直接创建传感器采集任务（任务内部自动初始化和重试）
+    xTaskCreate(sht30_task, "sht30_task", 4096, NULL, 4, NULL);
+    xTaskCreate(ultrasonic_task, "ultrasonic_task", 2048, NULL, 4, NULL);
+
+    // 主线程可空转或做监控
     while (1)
     {
-        // ultrasonic_measure_once(&hc_sr04_sensor);
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
-        sht30_read_data();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(10000));
     }
-
-    // sht30_deinit();
 }
